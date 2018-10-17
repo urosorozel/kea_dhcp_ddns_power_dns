@@ -1,0 +1,15 @@
+kea_dhcp_qualifying_suffix: "ipmi.dyn.zone.net."
+kea_dhcp_listen_interfaces: "ens4"
+kea_dhcp_subnet: "192.168.10.0/24"
+kea_dhcp_pool: "192.168.10.20 - 192.168.10.25"
+kea_ddns_tsig_algorithm: "hmac-md5"
+kea_ddns_tsig_key: "uwl4ytmI2Mt8MmjkvtmEpFu53nmib7dpe8Hkw169O7c="
+kea_ddns_forward_zone: "ipmi.dyn.zone.net."
+kea_ddns_tsig_key_name: "dhcpupdate" 
+kea_ddns_forward_dns_server: "{{ ansible_ens3.ipv4.address }}"
+kea_ddns_reverse_zone: "10.168.192.in-addr.arpa."
+kea_ddns_reverse_dns_server: "{{ ansible_ens3.ipv4.address }}"
+kea_ddns_log_severity: "INFO"
+kea_ddns_log_level: 0
+
+

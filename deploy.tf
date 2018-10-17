@@ -262,20 +262,3 @@ resource "openstack_compute_floatingip_associate_v2" "dhcp_server2_floating_ip" 
   fixed_ip    = "${openstack_compute_instance_v2.dhcp_server2_instance.network.0.fixed_ip_v4}"
 }
 
-#resource "openstack_blockstorage_volume_v2" "myvol" {
-#  name = "myvol"
-#  size = 1
-#}
-#
-#resource "openstack_compute_volume_attach_v2" "attached" {
-#  instance_id = "${openstack_compute_instance_v2.basic.id}"
-#  volume_id = "${openstack_blockstorage_volume_v2.myvol.id}"
-#}
-
-
-resource "null_resource" "get_config" {
-
-   provisioner "local-exec" {
-       command = "ansible-playbook deploy.yml"
-   }
-}

@@ -1,3 +1,0 @@
-debops.dhcpd
-debops.mariadb_server
-debops.mariadb

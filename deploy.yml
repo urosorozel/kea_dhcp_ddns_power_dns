@@ -24,139 +24,27 @@
       line: 'APT::Periodic::Enable "0";'
       state: present
 
-# good article https://www.madboa.com/geek/dhcp-failover/
-#- hosts: dhcp_servers
-#  remote_user: ubuntu
-#  gather_facts: True
-#  vars:
-#    dhcpd_options: |
-#      ddns-updates on;
-#      ddns-update-style interim;
-#      update-static-leases on;
-#    dhcpd_mode: 'server'
-#    dhcpd_ipversion: '4'
-#    dhcpd_interfaces: ['ens4']
-#    dhcpd_lease_time: '0.25'
-#    dhcpd_authoritative: True
-#    dhcpd_domain_name: 'ipmi.ai.prod.cba'
-#    # Full cluster configuration
-#    #dhcpd_subnets: [ '{{ dhcpd_subnet_default }}' ]
-#    dhcpd_subnets:
-#      - subnet: "{{ ansible_ens3.ipv4.network }}"
-#        netmask: "{{ ansible_ens3.ipv4.netmask }}"
-#    
-#      - subnet: "{{ ansible_ens4.ipv4.network }}"
-#        netmask: "{{ ansible_ens4.ipv4.netmask }}"
-#        options: |
-#          default-lease-time 300;
-#          max-lease-time 7200;
-#        pools:
-#          - comment: "A pool in a subnet"
-#            range: '192.168.10.10 192.168.10.20'
-#            options: |
-#              failover peer "failover-ipmi";
-#    dhcpd_failovers:
-#    - failover: 'failover-ipmi'
-#      primary: "{{ hostvars['dhcp-server1']['ansible_default_ipv4']['address'] }}"
-#      primary_fo_addr: "{{ hostvars['dhcp-server1']['ansible_default_ipv4']['address'] }}"
-#      secondary: "{{ hostvars['dhcp-server2']['ansible_default_ipv4']['address'] }}"
-#      secondary_fo_addr: "{{ hostvars['dhcp-server2']['ansible_default_ipv4']['address'] }}"
-#      port: 1337
-#      split: 128
-#      hba: aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa
-#      max_response_delay: 5
-#      max_unacked_updates: 10
-#      load_balance_max_seconds: 5
-#      auto_partner_down: 0
-#      max_lease_misbalance: 15
-#      max_lease_ownership: 10
-#      min_balance: 60
-#      max_balance: 3600
-    
-#    # Minimal cluster configuration
-#    dhcpd_failovers:
-#    - failover: 'failover-ipmi'
-#      #primary:  "{{ hostvars['dhcp-server1']['ansible_default_ipv4']['address'] }}"
-#      #secondary: "{{ hostvars['dhcp-server2']['ansible_default_ipv4']['address'] }}"
-#      primary: "{{ hostvars['dhcp-server1']['ansible_ens4']['ipv4']['address'] }}"
-#      secondary: "{{ hostvars['dhcp-server2']['ansible_ens4']['ipv4']['address'] }}"
-#      mclt: 3600
-#      split: 128
-#      max_response_delay: 5
-#      max_unacked_updates: 10
-#
-#    dhcpd_keys:
-#      - key: "dhcpupdate"
-#        algorithm: "hmac-md5"
-#        secret: "uwl4ytmI2Mt8MmjkvtmEpFu53nmib7dpe8Hkw169O7c="
-#
-#    dhcpd_zones:
-#      - zone: "{{dhcpd_domain_name}}."
-#        primary: "{{ hostvars['dhcp-server1']['ansible_ens3']['ipv4']['address'] }}" 
-#        key: "dhcpupdate"
-#      - zone: "10.168.192.in-addr.arpa."
-#        primary: "{{ hostvars['dhcp-server1']['ansible_ens3']['ipv4']['address'] }}"
-#        key: "dhcpupdate"
-#  roles:
-#     - { role: debops.dhcpd }
+  - name: Install PIP support
+    apt:
+      name: "{{ item }}"
+    with_items:
+      - mariadb-server
+      - python-pip
+      - python-setuptools
+      - default-libmysqlclient-dev
+      - build-essential
+      - python-dev
 
+  - name: Install MySQL-python
+    pip:
+      name: MySQL-python
 
-# good article https://www.madboa.com/geek/dhcp-failover/
-- hosts: dhcp_servers
-  remote_user: ubuntu
-  gather_facts: True
-  vars:
-    application__database_user: power
-    application__database_password: password
-    application__database_name: pdns
-    application__user: pdns
-    application__group: pdns
-    tes: "{{ ansible_ens3.ipv4.network }}"
-    # server vars
-    mariadb_server__bind_address: '0.0.0.0'
-    mariadb_server__allow: 
-      - "{{ ansible_ens3.ipv4.network }}"
-    # client vars
-    mariadb__users:
-    
-      - name: 'mariadb-admin'
-        owner: 'mariadb-admin'
-        home: '/var/local/mariadb-admin'
-
-  roles:
-     - { role: debops.mariadb_server }
-     - { role: debops.mariadb } 
-#        mariadb__dependent_users:
-#    
-#          - user: '{{ application__database_user }}'
-#            password: '{{ application__database_password }}'
-#            database: '{{ application__database_name }}'
-#            owner: '{{ application__user }}'
-#            group: '{{ application__group }}'
-#            home: '{{ application__home }}'
-#            system: True
-#            priv_aux: False
-  tasks:
-#    - name: "Debug"
-#      debug: var=hostvars['dhcp-server1']
-     - name: Create database user
-       mysql_user:
-         name: '{{ application__database_user }}'
-         host: '{{ ansible_ens3.ipv4.address }}'
-         password: '{{ application__database_password }}'
-         priv: '{{ application__database_name }}.*:ALL'
-         state: 'present'
-
-     - name: Create application database
-       mysql_db:
-         name: '{{ application__database_name }}'
-         state: 'present'
 
 - hosts: dhcp_servers 
   user: ubuntu
   gather_facts: True
   vars:
-    domain_name: ipmi.ai.prod.cba
+    domain_name: ipmi.dyn.zone.net
     rev_domain_name: 10.168.192.in-addr.arpa
     dhcpupdate_tsig_key_name: dhcpupdate
     dhcpupdate_tsig_key: uwl4ytmI2Mt8MmjkvtmEpFu53nmib7dpe8Hkw169O7c=
