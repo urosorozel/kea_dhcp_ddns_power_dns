@@ -1,0 +1,60 @@
+{
+
+    "DhcpDdns": {
+        "ip-address": "127.0.0.1",
+
+    "dns-server-timeout": 100,
+    "ncr-protocol": "UDP",
+    "ncr-format": "JSON",
+        "port": 53001,
+    "tsig-keys": [
+        {
+            "name": "{{ kea_ddns_tsig_key_name }}",
+            "algorithm": "{{ kea_ddns_tsig_algorithm | upper }}",
+            "secret": "{{ kea_ddns_tsig_key }}"
+        }
+    ],
+        "forward-ddns": {
+        "ddns-domains": [
+            {
+                "name": "{{ kea_ddns_forward_zone }}",
+                "key-name": "{{ kea_ddns_tsig_key_name }}",
+                "dns-servers": [
+                    {
+                        "hostname": "",
+                        "ip-address": "{{ kea_ddns_forward_dns_server }}",
+                        "port": 53
+                    }
+                ]
+            }
+        ]
+        },
+        "reverse-ddns": {
+        "ddns-domains": [
+            {
+                "name": "{{ kea_ddns_reverse_zone }}",
+                "key-name": "{{ kea_ddns_tsig_key_name }}",
+                "dns-servers": [
+                        {
+                        "hostname": "",
+                        "ip-address": "{{ kea_ddns_reverse_dns_server }}",
+                        "port": 53
+                }
+                ]
+            }
+        ]
+        }
+    },
+
+    "Logging": {
+        "loggers": [{
+            "name": "kea-dhcp-ddns",
+            "output_options": [{
+                "output": "/var/log/kea-ddns.log"
+            }],
+            "severity": "{{ kea_ddns_log_severity }}",
+            "debuglevel": {{ kea_ddns_log_level }}
+        }]
+    }
+
+}
